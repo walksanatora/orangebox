@@ -1,0 +1,519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>yellowbox</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>yellowbox</code></h1>
+<p>YellowBox 1.0
+ By JackMacWindows</p>
+<p></p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new">new (bios, The)</a></td>
+	<td class="summary">Creates a new box.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#makeenv">makeenv ()</a></td>
+	<td class="summary">Creates the environment for the box.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#getfenv">getfenv ()</a></td>
+	<td class="summary">Returns the global environment for the box.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#reloadenv">reloadenv ()</a></td>
+	<td class="summary">Loads the BIOS if necessary and sets a new environment.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#resume">resume ()</a></td>
+	<td class="summary">Resumes the box's execution, or starts it if it's not running.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#queueEvent">queueEvent (event, ...)</a></td>
+	<td class="summary">Queues an event inside the box.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#halt">halt ()</a></td>
+	<td class="summary">Halts the box, deleting any coroutines and resetting the state.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mount">mount (innerPath, outerPath)</a></td>
+	<td class="summary">Mounts a path from outside the box inside the environment.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#unmount">unmount (innerPath)</a></td>
+	<td class="summary">Unmounts a previously mounted directory.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loadBIOS">loadBIOS (path)</a></td>
+	<td class="summary">Loads a BIOS file from a path.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#enableCompression">enableCompression (enable)</a></td>
+	<td class="summary">sets the status of compression for disk files
+ this uses LibDeflate [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)
+ this option only appears if LibDeflate was able to be required via `require("LibDeflate")`</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compressionEnabled">compressionEnabled ()</a></td>
+	<td class="summary">gets the status of compression for disk files
+ this option only appears if LibDeflate was able to be required via `require("LibDeflate")`</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#loadVFS">loadVFS (path, readOnly)</a></td>
+	<td class="summary">Loads a VFS disk and optionally sets up write-backs.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#exportPeripheral">exportPeripheral (name, innerName)</a></td>
+	<td class="summary">Exports a peripheral from outside the box in.</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#sideNames">sideNames</a></td>
+	<td class="summary">This table converts side names to side numbers.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#sideNumbers">sideNumbers</a></td>
+	<td class="summary">This table converts side numbers to side names.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "new"></a>
+    <strong>new (bios, The)</strong>
+    </dt>
+    <dd>
+    Creates a new box.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">bios</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         The BIOS to use. If unset, use loadBIOS later.
+        </li>
+        <li><span class="parameter">The</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a> or <span class="type">nil</span></span>
+         disk data. If unset, defaults to an empty disk.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">yellowbox</span></span>
+        A new box instance.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "makeenv"></a>
+    <strong>makeenv ()</strong>
+    </dt>
+    <dd>
+    Creates the environment for the box.  This is mostly an internal function,
+ but it's exported as part of the class.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        A new environment for the box.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "getfenv"></a>
+    <strong>getfenv ()</strong>
+    </dt>
+    <dd>
+    Returns the global environment for the box.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The box's global environment.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "reloadenv"></a>
+    <strong>reloadenv ()</strong>
+    </dt>
+    <dd>
+    Loads the BIOS if necessary and sets a new environment.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "resume"></a>
+    <strong>resume ()</strong>
+    </dt>
+    <dd>
+    Resumes the box's execution, or starts it if it's not running.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "queueEvent"></a>
+    <strong>queueEvent (event, ...)</strong>
+    </dt>
+    <dd>
+    Queues an event inside the box.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">event</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The event name to queue.
+        </li>
+        <li><span class="parameter">...</span>
+         The event's arguments.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "halt"></a>
+    <strong>halt ()</strong>
+    </dt>
+    <dd>
+    Halts the box, deleting any coroutines and resetting the state.
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mount"></a>
+    <strong>mount (innerPath, outerPath)</strong>
+    </dt>
+    <dd>
+    Mounts a path from outside the box inside the environment.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">innerPath</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path to the mount inside the box.
+        </li>
+        <li><span class="parameter">outerPath</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path to the mounted folder outside the box.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "unmount"></a>
+    <strong>unmount (innerPath)</strong>
+    </dt>
+    <dd>
+    Unmounts a previously mounted directory.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">innerPath</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path to the mount inside the box.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "loadBIOS"></a>
+    <strong>loadBIOS (path)</strong>
+    </dt>
+    <dd>
+    Loads a BIOS file from a path.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path to the BIOS.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "enableCompression"></a>
+    <strong>enableCompression (enable)</strong>
+    </dt>
+    <dd>
+    sets the status of compression for disk files
+ this uses LibDeflate [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)
+ this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">enable</span>
+            <span class="types"><span class="type">boolean</span></span>
+         whether or not to compress vfs files
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compressionEnabled"></a>
+    <strong>compressionEnabled ()</strong>
+    </dt>
+    <dd>
+    gets the status of compression for disk files
+ this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        compression_enabled whether or not compression is enabled
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "loadVFS"></a>
+    <strong>loadVFS (path, readOnly)</strong>
+    </dt>
+    <dd>
+    Loads a VFS disk and optionally sets up write-backs.
+ This uses a basic serialized table to store data. More efficient methods are
+ available, but these are left to the user to implement.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path to the VFS.
+        </li>
+        <li><span class="parameter">readOnly</span>
+            <span class="types"><span class="type">boolean</span> or <span class="type">nil</span></span>
+         Whether the disk is read-only (won't sync changes to the file).
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "exportPeripheral"></a>
+    <strong>exportPeripheral (name, innerName)</strong>
+    </dt>
+    <dd>
+    Exports a peripheral from outside the box in.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the peripheral as available outside the box.
+        </li>
+        <li><span class="parameter">innerName</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a> or <span class="type">nil</span></span>
+         The name of the peripheral as it will appear inside the box. Defaults to the same name as outside.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "sideNames"></a>
+    <strong>sideNames</strong>
+    </dt>
+    <dd>
+    This table converts side names to side numbers.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+
+        </li>
+        <li><span class="parameter">bottom</span>
+
+        </li>
+        <li><span class="parameter">left</span>
+
+        </li>
+        <li><span class="parameter">right</span>
+
+        </li>
+        <li><span class="parameter">front</span>
+
+        </li>
+        <li><span class="parameter">back</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "sideNumbers"></a>
+    <strong>sideNumbers</strong>
+    </dt>
+    <dd>
+    This table converts side numbers to side names.
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">top</span>
+
+        </li>
+        <li><span class="parameter">bottom</span>
+
+        </li>
+        <li><span class="parameter">left</span>
+
+        </li>
+        <li><span class="parameter">right</span>
+
+        </li>
+        <li><span class="parameter">front</span>
+
+        </li>
+        <li><span class="parameter">back</span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-12-10 21:13:47 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
