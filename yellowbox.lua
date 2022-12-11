@@ -121,6 +121,9 @@ function yellowbox:new(bios, disk)
         disk = disk or {},
         syncfs = function() end,
         compression_enabled = false,
+        fs_dirty = false,
+        sync_last = os.epoch("utc"),
+        sync_cooldown_ms = 10000,
         term = (
             function ()
                 local a = term.current()
@@ -892,7 +895,7 @@ function yellowbox:resume()
                 self.running = false
                 self.startTime = nil
                 self.eventQueue = {}
-                self:syncfs()
+                self:syncfs(true)
                 error("YellowBox environment threw an exception: " .. err, 2)
             end
         end
@@ -901,6 +904,7 @@ function yellowbox:resume()
             if self.filter == nil or self.filter == ev[1] or ev[1] == "terminate" then
                 if ev[1] == "timer" then self.timers[ev[2]] = nil
                 elseif ev[1] == "alarm" then self.alarms[ev[2]] = nil end
+                if  ((self.sync_last + self.sync_cooldown_ms) >= os.epoch('utc')) and self.compression_enabled and self.fs_dirty then self:syncfs() end
                 ok, self.filter = coroutine.resume(self.coro, table.unpack(ev))
                 if not ok then
                     local err = self.filter
@@ -909,7 +913,7 @@ function yellowbox:resume()
                     self.running = false
                     self.startTime = nil
                     self.eventQueue = {}
-                    self:syncfs()
+                    self:syncfs(true)
                     error("YellowBox environment threw an exception: " .. err, 2)
                 end
             end
@@ -919,7 +923,7 @@ function yellowbox:resume()
             self.coro = nil
             self.startTime = nil
             self.eventQueue = {}
-            self:syncfs()
+            self:syncfs(true)
         end
     until self.running ~= 2
 end
@@ -1018,17 +1022,25 @@ function yellowbox:loadVFS(path, readOnly)
         end
     else self.disk = {} end
     if not readOnly then
-        self.syncfs = function(self)
-            local file = fs.open(path, "wb")
-            if file == nil then return end
-            if self.compression_enabled then
-                print("saving vfs+gzip")
-                file.write(libdeflate:CompressGzip(textutils.serialize(self.disk, {compact = true})))
+        self.syncfs = function(self,force)
+            if force then print("forcing disk sync") end
+            if ((self.sync_last + self.sync_cooldown_ms) >= os.epoch("utc")) and self.compression_enabled or force then
+                local file = fs.open(path, "wb")
+                if file == nil then return end
+                if self.compression_enabled then
+                    print("saving vfs+gzip")
+                    file.write(libdeflate:CompressGzip(textutils.serialize(self.disk, {compact = true})))
+                else
+                    print("saving vfs")
+                    file.write(textutils.serialize(self.disk, {compact = true}))
+                end
+                file.close()
+                self.fs_dirty = false
+                self.sync_last = os.epoch("utc")
             else
-                print("saving vfs")
-                file.write(textutils.serialize(self.disk, {compact = true}))
+                print("defer sync")
+                self.fs_dirty = true
             end
-            file.close()
         end
     else self.syncfs = function() end end
 end
