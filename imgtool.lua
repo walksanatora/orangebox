@@ -14,7 +14,7 @@ if not shell.getCompletionInfo()[d] then
         {sc.dirOrFile, many=true}
     ))
     settings.define("imgtool.overwrite",{default=false,type="boolean",description="whether to skip overwrite prompt"})
-    settings.define("imgtool.dir_action",{default="",type="string",description="default action to take when unpacking and dir exists"})
+    settings.define("imgtool.dir_action",{default="",type="string",description="default action to take when unpacking and dir exists,Merge/Overwrite/Cancle M/O/C"})
 end
 
 local opts = {...}
@@ -121,7 +121,8 @@ else
             print("Selected Merge")
         elseif dir_action == "O" then
             print("selected overwrite")
-            fs.delete(rpath);
+            local ok = pcall(fs.delete,rpath);
+            if not ok then print("failed to delete, probally because it is `/` but it is writable so lets go")
         else
             print("Cancelled")
             return
