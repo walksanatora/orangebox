@@ -1,14 +1,14 @@
---- YellowBox 1.0
+--- orangebox 1.0
 -- By JackMacWindows
 --
--- @module yellowbox
+-- @module orangebox
 --
 -- This module allows you to easily create and manage special ComputerCraft
 -- containers called "boxes". These boxes contain their own separate execution
 -- environment, completely sequestered from the caller's environment. This allows
 -- effective "virtual machines" running CraftOS.
 --
--- YellowBox supports:
+-- orangebox supports:
 -- * Custom BIOSes
 -- * Virtual filesystems (including a basic serialize/deserialize storage format)
 -- * Custom terminals
@@ -19,7 +19,7 @@
 -- * Custom configuration (for some options)
 -- * Redstone interception
 --
--- To create a new box, use yellowbox:new(). Then call box:resume() to start
+-- To create a new box, use orangebox:new(). Then call box:resume() to start
 -- execution. The resume method exits either when the computer shuts down or
 -- there are no more events waiting in the queue. To replenish the events and
 -- continue execution, use box:queueEvent(event, ...) to push more events to the
@@ -40,10 +40,10 @@
 -- you can call box:reloadenv() to reload the environment (however, this may or
 -- may not work properly depending on the workings of the embedded OS).
 --
--- Here's an example program demonstrating how to use YellowBox:
+-- Here's an example program demonstrating how to use orangebox:
 --
 --   local file = fs.open("bios.lua", "rb")
---   local vm = yellowbox:new(file.readAll())
+--   local vm = orangebox:new(file.readAll())
 --   file.close()
 --   vm:loadVFS("filesystem.vfs")
 --   vm:mount("/realFS", "/")
@@ -78,7 +78,7 @@
 
 local expect = require "cc.expect".expect
 
-local yellowbox = {}
+local orangebox = {}
 
 local debugger = peripheral.find("debugger")
 
@@ -89,7 +89,7 @@ end
 local found_libdeflate, libdeflate = pcall(require, "LibDeflate")
 
 --- This table converts side names to side numbers.
-yellowbox.sideNames = {
+orangebox.sideNames = {
     top = 1,
     bottom = 2,
     left = 3,
@@ -99,7 +99,7 @@ yellowbox.sideNames = {
 }
 
 --- This table converts side numbers to side names.
-yellowbox.sideNumbers = {
+orangebox.sideNumbers = {
     "top",
     "bottom",
     "left",
@@ -111,8 +111,8 @@ yellowbox.sideNumbers = {
 --- Creates a new box.
 -- @tparam string|nil bios The BIOS to use. If unset, use loadBIOS later.
 -- @tparam table|nil The disk data. If unset, defaults to an empty disk.
--- @treturn yellowbox A new box instance.
-function yellowbox:new(bios, disk)
+-- @treturn orangebox A new box instance.
+function orangebox:new(bios, disk)
     expect(1, bios, "string", "nil")
     expect(2, disk, "table", "nil")
     local obj = setmetatable({
@@ -156,7 +156,7 @@ function yellowbox:new(bios, disk)
         startTime = nil,
         filter = nil,
         openFiles = 0,
-    }, {__index = yellowbox})
+    }, {__index = orangebox})
     if bios then
         obj.fn = load(bios, "=bios.lua", "t", obj:makeenv())
         obj.coro = coroutine.create(obj.fn)
@@ -243,7 +243,7 @@ local fs, os, peripheral, getfenv, setfenv, load, loadstring = fs, os, periphera
 --- Creates the environment for the box. This is mostly an internal function,
 -- but it's exported as part of the class.
 -- @treturn table A new environment for the box.
-function yellowbox:makeenv()
+function orangebox:makeenv()
     local env
     env = {
         assert = assert,
@@ -279,7 +279,7 @@ function yellowbox:makeenv()
         unpack = unpack,
         _VERSION = _VERSION,
         xpcall = xpcall,
-        _HOST = "ComputerCraft 1.95.2 (YellowBox 1.0)",
+        _HOST = "ComputerCraft 1.95.2 (orangebox 1.0)",
         _CC_DEFAULT_SETTINGS = self.config.default_computer_settings,
         _CC_DISABLE_LUA51_FEATURES = self.config.disable_lua51_features,
         coroutine = coroutine,
@@ -783,63 +783,63 @@ function yellowbox:makeenv()
             end,
         },
         redstone = {
-            getSides = function() return yellowbox.sideNumbers end,
+            getSides = function() return orangebox.sideNumbers end,
             getInput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.input[yellowbox.sideNames[side]] ~= 0
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.input[orangebox.sideNames[side]] ~= 0
             end,
             getOutput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.output[yellowbox.sideNames[side]] ~= 0
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.output[orangebox.sideNames[side]] ~= 0
             end,
             setOutput = function(side, output)
                 expect(1, side, "string")
                 expect(2, output, "boolean")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                self.redstone.output[yellowbox.sideNames[side]] = output and 15 or 0
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                self.redstone.output[orangebox.sideNames[side]] = output and 15 or 0
             end,
             getAnalogInput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.input[yellowbox.sideNames[side]]
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.input[orangebox.sideNames[side]]
             end,
             getAnalogOutput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.output[yellowbox.sideNames[side]]
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.output[orangebox.sideNames[side]]
             end,
             setAnalogOutput = function(side, output)
                 expect(1, side, "string")
                 expect(2, output, "number")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
                 if output < 0 or output > 15 then error("Expected number in range 0-15", 2) end
-                self.redstone.output[yellowbox.sideNames[side]] = output
+                self.redstone.output[orangebox.sideNames[side]] = output
             end,
             getBundledInput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.bundledInput[yellowbox.sideNames[side]]
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.bundledInput[orangebox.sideNames[side]]
             end,
             getBundledOutput = function(side)
                 expect(1, side, "string")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
-                return self.redstone.bundledOutput[yellowbox.sideNames[side]]
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                return self.redstone.bundledOutput[orangebox.sideNames[side]]
             end,
             setBundledOutput = function(side, output)
                 expect(1, side, "string")
                 expect(2, output, "number")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
                 if output < 0 or output > 65535 then error("Expected number in range 0-65535", 2) end
-                self.redstone.bundledOutput[yellowbox.sideNames[side]] = output
+                self.redstone.bundledOutput[orangebox.sideNames[side]] = output
             end,
             testBundledInput = function(side, mask)
                 expect(1, side, "string")
                 expect(2, mask, "number")
-                if yellowbox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
+                if orangebox.sideNames[side] == nil then error("bad argument #1 (invalid option " .. side .. ")", 2) end
                 if mask < 0 or mask > 65535 then error("Expected number in range 0-65535", 2) end
-                return bit32.btest(self.redstone.bundledInput[yellowbox.sideNames[side]], mask)
+                return bit32.btest(self.redstone.bundledInput[orangebox.sideNames[side]], mask)
             end
         },
         vm = {
@@ -864,19 +864,19 @@ end
 
 --- Returns the global environment for the box.
 -- @treturn table The box's global environment.
-function yellowbox:getfenv()
+function orangebox:getfenv()
     return getfenv(self.fn)
 end
 
 --- Loads the BIOS if necessary and sets a new environment.
-function yellowbox:reloadenv()
+function orangebox:reloadenv()
     if self.bios == nil then error("No BIOS was specified. Please set self.bios to the contents of the BIOS script.", 2) end
     if self.fn == nil then self.fn = load(self.bios, "=bios.lua", "t", self:makeenv())
     else setfenv(self.fn, self:makeenv()) end
 end
 
 --- Resumes the box's execution, or starts it if it's not running.
-function yellowbox:resume()
+function orangebox:resume()
     local ok
     repeat
         if not self.coro then
@@ -896,7 +896,7 @@ function yellowbox:resume()
                 self.startTime = nil
                 self.eventQueue = {}
                 self:syncfs(true)
-                error("YellowBox environment threw an exception: " .. err, 2)
+                error("orangebox environment threw an exception: " .. err, 2)
             end
         end
         while #self.eventQueue > 0 and self.running == true do
@@ -914,7 +914,7 @@ function yellowbox:resume()
                     self.startTime = nil
                     self.eventQueue = {}
                     self:syncfs(true)
-                    error("YellowBox environment threw an exception: " .. err, 2)
+                    error("orangebox environment threw an exception: " .. err, 2)
                 end
             end
         end
@@ -931,14 +931,14 @@ end
 --- Queues an event inside the box.
 -- @tparam string event The event name to queue.
 -- @param ... The event's arguments.
-function yellowbox:queueEvent(event, ...)
+function orangebox:queueEvent(event, ...)
     expect(1, event, "string")
     if event == "timer" and self.timers[...] == nil or event == "alarm" and self.alarms[...] == nil then return end
     self.eventQueue[#self.eventQueue + 1] = {event, ...}
 end
 
 --- Halts the box, deleting any coroutines and resetting the state.
-function yellowbox:halt()
+function orangebox:halt()
     self.running = false
     self.coro = nil
     self.startTime = nil
@@ -949,7 +949,7 @@ end
 --- Mounts a path from outside the box inside the environment.
 -- @tparam string innerPath The path to the mount inside the box.
 -- @tparam string outerPath The path to the mounted folder outside the box.
-function yellowbox:mount(innerPath, outerPath)
+function orangebox:mount(innerPath, outerPath)
     expect(1, innerPath, "string")
     expect(2, outerPath, "string")
     local parts = {}
@@ -959,7 +959,7 @@ end
 
 --- Unmounts a previously mounted directory.
 -- @tparam string innerPath The path to the mount inside the box.
-function yellowbox:unmount(innerPath)
+function orangebox:unmount(innerPath)
     expect(1, innerPath, "string")
     local parts = {}
     for p in fs.combine(innerPath):gmatch("[^/]+") do parts[#parts + 1] = p end
@@ -973,7 +973,7 @@ end
 
 --- Loads a BIOS file from a path.
 -- @tparam string path The path to the BIOS.
-function yellowbox:loadBIOS(path)
+function orangebox:loadBIOS(path)
     expect(1, path, "string")
     local file, err = fs.open(path, "rb")
     if file == nil then error(err, 2) end
@@ -987,13 +987,13 @@ if found_libdeflate then
     -- this uses LibDeflate [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)
     -- this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
     -- @tparam boolean enable whether or not to compress vfs files
-    function yellowbox:enableCompression(enable)
+    function orangebox:enableCompression(enable)
         self.compression_enabled = enable
     end
     --- gets the status of compression for disk files
     -- this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
     -- @treturn boolean whether or not compression is enabled
-    function yellowbox:compressionEnabled()
+    function orangebox:compressionEnabled()
         return self.compression_enabled
     end
 else
@@ -1006,7 +1006,7 @@ end
 -- available, but these are left to the user to implement.
 -- @tparam string path The path to the VFS.
 -- @tparam boolean|nil readOnly Whether the disk is read-only (won't sync changes to the file).
-function yellowbox:loadVFS(path, readOnly)
+function orangebox:loadVFS(path, readOnly)
     expect(1, path, "string")
     expect(2, readOnly, "boolean", "nil")
     local file = fs.open(path, "rb")
@@ -1048,10 +1048,10 @@ end
 --- Exports a peripheral from outside the box in.
 -- @tparam string name The name of the peripheral as available outside the box.
 -- @tparam string|nil innerName The name of the peripheral as it will appear inside the box. Defaults to the same name as outside.
-function yellowbox:exportPeripheral(name, innerName)
+function orangebox:exportPeripheral(name, innerName)
     expect(1, name, "string")
     expect(2, innerName, "string", "nil")
     self.peripherals[innerName or name] = name
 end
 
-return yellowbox
+return orangebox
