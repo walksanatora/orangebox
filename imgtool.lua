@@ -4,7 +4,7 @@ local sc = require "cc.shell.completion"
 local pdir = fs.getDir(shell.getRunningProgram())
 package.path = package.path .. ";/" .. pdir .. "/?.lua;/" .. pdir .."/?;" .. pdir .. "?"
 
-loaded_ld, ld = pcall(require, "LibDeflate")
+local loaded_ld, ld = pcall(require, "LibDeflate")
 
 if not shell.getCompletionInfo()[d] then
     shell.setCompletionFunction(d,sc.build(
@@ -13,7 +13,8 @@ if not shell.getCompletionInfo()[d] then
         sc.file,
         {sc.dirOrFile, many=true}
     ))
-    settings.define("imgtool.overwrite",{default=false,type="boolean",description="whether to skip  overwrite prompt"})
+    settings.define("imgtool.overwrite",{default=false,type="boolean",description="whether to skip overwrite prompt"})
+    settings.define("imgtool.dir_action",{default="",type="string",description="default action to take when unpacking and dir exists"})
 end
 
 local opts = {...}
@@ -101,13 +102,24 @@ else
         error(files[1].." is not writable")
     end
 
-    if fs.exists(rpath) then
+    local dir_action = settings.get("imgtool.dir_action")
+    if fs.exists(rpath) and (dir_action ~= "M") and (dir_action ~= "O") and (dir_action ~= "C") and fs.exists(rpath) then
         print("directory "..files[1].."allready exist, Merge,Overwrite,Cancel?")
         write("<M/O/C>: ")
         local pr = read(nil,{"M","O","C"},function (t) require("cc.completion").choice(t,{"M","O","C"})end)
         if pr == "M" then
             print("Selected Merge")
         elseif pr == "O" then
+            print("selected overwrite")
+            fs.delete(rpath);
+        else
+            print("Cancelled")
+            return
+        end
+    elseif fs.exists(rpath) then
+        if dir_action == "M" then
+            print("Selected Merge")
+        elseif dir_action == "O" then
             print("selected overwrite")
             fs.delete(rpath);
         else
@@ -137,9 +149,7 @@ else
     diskf.close()
     local d
     if compression == "compress" then content,d = ld:DecompressGzip(content) end
-    print(d)
     local tcontents = textutils.unserialize(content)
-    print(type(tcontents))
     local sdir = shell.dir()
     print("unpacking vfs")
     unpack_vfs("",tcontents)
