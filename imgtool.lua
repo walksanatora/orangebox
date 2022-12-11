@@ -122,7 +122,7 @@ else
         elseif dir_action == "O" then
             print("selected overwrite")
             local ok = pcall(fs.delete,rpath);
-            if not ok then print("failed to delete, probally because it is `/` but it is writable so lets go")
+            if not ok then print("failed to delete, probally because it is `/` but it is writable so lets go")end 
         else
             print("Cancelled")
             return
