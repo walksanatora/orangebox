@@ -1,4 +1,4 @@
-# YellowBox
+# NestBox
 A Virtual machine for ComputerCraft<br>
 this is basically a maintained fork of [MCJack123/yellowbox.lua](https://gist.github.com/MCJack123/e634347fe7a3025d19d9f7fcf7e01c24)<br>
 <br>
