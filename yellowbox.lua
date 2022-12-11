@@ -80,7 +80,13 @@ local expect = require "cc.expect".expect
 
 local yellowbox = {}
 
-local found_libdeflate, libdeflate = pcall(function() return require("LibDeflate") end)
+local debugger = peripheral.find("debugger")
+
+local function print(message)
+    _ = debugger and debugger.print(message)
+end
+
+local found_libdeflate, libdeflate = pcall(require, "LibDeflate")
 
 --- This table converts side names to side numbers.
 yellowbox.sideNames = {
@@ -89,7 +95,7 @@ yellowbox.sideNames = {
     left = 3,
     right = 4,
     front = 5,
-    back = 6
+    back = 6,
 }
 
 --- This table converts side numbers to side names.
@@ -99,7 +105,7 @@ yellowbox.sideNumbers = {
     "left",
     "right",
     "front",
-    "back"
+    "back",
 }
 
 --- Creates a new box.
@@ -117,9 +123,9 @@ function yellowbox:new(bios, disk)
         compression_enabled = false,
         term = (
             function ()
-                local a=term.current()
-                a.nativePaletteColor=term.nativePaletteColor
-                a.nativePaletteColour=term.nativePaletteColour
+                local a = term.current()
+                a.nativePaletteColor = term.nativePaletteColor
+                a.nativePaletteColour = term.nativePaletteColour
                 return a
             end)(),
         eventQueue = {},
@@ -131,13 +137,13 @@ function yellowbox:new(bios, disk)
             http_websocket_enable = http ~= nil and http.websocket ~= nil,
             disable_lua51_features = _CC_DISABLE_LUA51_FEATURES,
             default_computer_settings = _CC_DEFAULT_SETTINGS,
-            maximumFilesOpen = 128
+            maximumFilesOpen = 128,
         },
         redstone = {
             input = {0, 0, 0, 0, 0, 0},
             output = {0, 0, 0, 0, 0, 0},
             bundledInput = {0, 0, 0, 0, 0, 0},
-            bundledOutput = {0, 0, 0, 0, 0, 0}
+            bundledOutput = {0, 0, 0, 0, 0, 0},
         },
         timers = {},
         alarms = {},
@@ -146,7 +152,7 @@ function yellowbox:new(bios, disk)
         label = nil,
         startTime = nil,
         filter = nil,
-        openFiles = 0
+        openFiles = 0,
     }, {__index = yellowbox})
     if bios then
         obj.fn = load(bios, "=bios.lua", "t", obj:makeenv())
@@ -157,12 +163,12 @@ end
 
 local function checkMount(mounts, path)
     local parts = {}
-    for p in fs.combine(path):gmatch("[^/]+") do parts[#parts+1] = p end
-    for k,v in pairs(mounts) do
+    for p in fs.combine(path):gmatch("[^/]+") do parts[#parts + 1] = p end
+    for k, v in pairs(mounts) do
         local ok = true
-        for i,p in ipairs(k) do if parts[i] ~= p then ok = false break end end
+        for i, p in ipairs(k) do if parts[i] ~= p then ok = false break end end
         if ok then
-            for i = 1, #k do table.remove(parts, 1) end
+            for _ = 1, #k do table.remove(parts, 1) end
             return true, fs.combine(v, table.concat(parts, "/"))
         end
     end
@@ -204,7 +210,7 @@ end
 local function aux_find(parts, t, mounts)
     if #parts == 0 then return type(t) == "table" and "" or t elseif type(t) ~= "table" then return nil end
     local parts2 = {}
-    for i,v in ipairs(parts) do parts2[i] = v end
+    for i, v in ipairs(parts) do parts2[i] = v end
     local name = table.remove(parts2, 1)
     local retval = {}
     if t then for k, v in pairs(t) do if k:match("^" .. name:gsub("([%%%.])", "%%%1"):gsub("%*", "%.%*") .. "$") then retval[k] = aux_find(parts2, v, mounts[k]) end end end
@@ -212,7 +218,7 @@ local function aux_find(parts, t, mounts)
         if #k == 1 then
             local r = fs.find(fs.combine(v, table.concat(parts2, "/")))
             retval[k[1]] = {}
-            for _,w in ipairs(r) do retval[k[1]][fs.combine((w:gsub(v, "")))] = "" end
+            for _, w in ipairs(r) do retval[k[1]][fs.combine((w:gsub(v, "")))] = "" end
         else retval[k[1]] = aux_find(parts2, t[k[1]], {table.unpack(k, 2)}) end 
     end end end
     return retval
@@ -222,9 +228,9 @@ local function combineKeys(t, prefix)
     prefix = prefix or ""
     if t == nil then return {} end
     local retval = {}
-    for k,v in pairs(t) do
+    for k, v in pairs(t) do
         if type(v) == "string" then table.insert(retval, prefix .. k)
-        else for _,w in ipairs(combineKeys(v, prefix .. k .. "/")) do table.insert(retval, w) end end
+        else for _, w in ipairs(combineKeys(v, prefix .. k .. "/")) do table.insert(retval, w) end end
     end
     return retval
 end
@@ -287,14 +293,14 @@ function yellowbox:makeenv()
                 local tab = getPath(self.disk, path)
                 if type(tab) ~= "table" then error(path .. ": Not a directory", 2) end
                 local retval = {}
-                for k in pairs(tab) do retval[#retval+1] = k end
+                for k in pairs(tab) do retval[#retval + 1] = k end
                 local parts = {}
-                for p in fs.combine(path):gmatch("[^/]+") do parts[#parts+1] = p end
-                for k,v in pairs(self.mounts) do
+                for p in fs.combine(path):gmatch("[^/]+") do parts[#parts + 1] = p end
+                for k in pairs(self.mounts) do
                     if #parts == #k - 1 then
                         local ok = true
-                        for i,p in ipairs(k) do if parts[i] ~= p and i < #k then ok = false break end end
-                        if ok then retval[#retval+1] = k[#k] end
+                        for i, p in ipairs(k) do if parts[i] ~= p and i < #k then ok = false break end end
+                        if ok then retval[#retval + 1] = k[#k] end
                     end
                 end
                 table.sort(retval)
@@ -366,7 +372,7 @@ function yellowbox:makeenv()
                         if fs.isReadOnly(from) then error(fromPath .. ": Access denied", level) end
                         if fs.isDir(from) then
                             toTab[idx] = {}
-                            for _,v in ipairs(fs.list(from)) do
+                            for _, v in ipairs(fs.list(from)) do
                                 move(fs.combine(from, v), toTab[idx], level + 1)
                             end
                             fs.delete(from)
@@ -415,7 +421,7 @@ function yellowbox:makeenv()
                     local function copy(from, toTab, idx, level)
                         if fs.isDir(from) then
                             toTab[idx] = {}
-                            for _,v in ipairs(fs.list(from)) do
+                            for _, v in ipairs(fs.list(from)) do
                                 copy(fs.combine(from, v), toTab[idx], level + 1)
                             end
                         else
@@ -523,7 +529,7 @@ function yellowbox:makeenv()
                                 elseif whence == "end" then pos = #tab - offset
                                 else error("bad argument #1 (invalid option " .. whence .. ")", 2) end
                                 return pos
-                            end
+                            end,
                         }
                     else
                         local tab = getPath(self.disk, path)
@@ -566,7 +572,7 @@ function yellowbox:makeenv()
                                 if closed then error("file is already closed", 2) end
                                 closed = true
                                 self.openFiles = self.openFiles - 1
-                            end
+                            end,
                         }
                     end
                 elseif mode:find("w") or mode:find("a") then
@@ -621,7 +627,7 @@ function yellowbox:makeenv()
                                 elseif whence == "end" then pos = #tab - offset
                                 else error("bad argument #1 (invalid option " .. whence .. ")", 2) end
                                 return pos
-                            end
+                            end,
                         }
                     else
                         local dir = getPath_mkdir(self.disk, fs.getDir(path))
@@ -661,7 +667,7 @@ function yellowbox:makeenv()
                                 self:syncfs()
                                 closed = true
                                 self.openFiles = self.openFiles - 1
-                            end
+                            end,
                         }
                     end
                 else return nil, "Invalid mode" end
@@ -669,9 +675,9 @@ function yellowbox:makeenv()
             find = function(wildcard)
                 expect(1, wildcard, "string")
                 local parts = {}
-                for p in wildcard:gmatch("[^/]+") do parts[#parts+1] = p end
+                for p in wildcard:gmatch("[^/]+") do parts[#parts + 1] = p end
                 local retval = {}
-                for _,v in ipairs(combineKeys(aux_find(parts, self.disk, self.mounts))) do table.insert(retval, v) end
+                for _, v in ipairs(combineKeys(aux_find(parts, self.disk, self.mounts))) do table.insert(retval, v) end
                 table.sort(retval)
                 return retval
             end,
@@ -686,7 +692,7 @@ function yellowbox:makeenv()
                     isDir = type(tab) == "table",
                     isReadOnly = false,
                     created = 0,
-                    modified = 0
+                    modified = 0,
                 }
             end,
             getCapacity = function(path)
@@ -694,17 +700,20 @@ function yellowbox:makeenv()
                 local isMount, mountPath = checkMount(self.mounts, path)
                 if isMount then return fs.getCapacity(mountPath) end
                 return 1000000
-            end
+            end,
+            sync = function()
+                self:syncfs()
+            end,
         },
         http = self.config.http_enable and {
             request = http.request,
             checkURL = http.checkURLAsync,
-            websocket = self.config.http_websocket_enable and http.websocketAsync or nil
+            websocket = self.config.http_websocket_enable and http.websocketAsync or nil,
         } or nil,
         os = {
             queueEvent = function(event, ...)
                 expect(1, event, "string")
-                self.eventQueue[#self.eventQueue+1] = {event, ...}
+                self.eventQueue[#self.eventQueue + 1] = {event, ...}
             end,
             startTimer = function(timeout)
                 expect(1, timeout, "number")
@@ -742,7 +751,7 @@ function yellowbox:makeenv()
             time = os.time,
             day = os.day,
             epoch = os.epoch,
-            date = os.date
+            date = os.date,
         },
         peripheral = {
             isPresent = function(side)
@@ -752,23 +761,23 @@ function yellowbox:makeenv()
             getType = function(side)
                 expect(1, side, "string")
                 if self.peripherals[side] then return peripheral.getType(self.peripherals[side]) end
-                error("No such peripheral", 2)
+                return nil
             end,
             hasType = function(side, type)
                 expect(1, side, "string")
                 expect(2, type, "string")
-                return self.peripherals[side] and peripheral.hasType(self.peripherals[side], type) or error("No such peripheral", 2)
+                return self.peripherals[side] and peripheral.hasType(self.peripherals[side], type) or nil
             end,
             getMethods = function(side)
                 expect(1, side, "string")
-                return self.peripherals[side] and peripheral.getMethods(self.peripherals[side]) or error("No such peripheral", 2)
+                return self.peripherals[side] and peripheral.getMethods(self.peripherals[side]) or nil
             end,
             call = function(side, method, ...)
                 expect(1, side, "string")
                 expect(2, method, "string")
                 if self.peripherals[side] then return peripheral.call(self.peripherals[side], method, ...) end
                 error("No such peripheral", 2)
-            end
+            end,
         },
         redstone = {
             getSides = function() return yellowbox.sideNumbers end,
@@ -829,6 +838,14 @@ function yellowbox:makeenv()
                 if mask < 0 or mask > 65535 then error("Expected number in range 0-65535", 2) end
                 return bit32.btest(self.redstone.bundledInput[yellowbox.sideNames[side]], mask)
             end
+        },
+        vm = {
+            compressionEnabled = function ()
+               return self:compressionEnabled()
+            end,
+            exit = function ()
+                self:halt()
+            end
         }
     }
     env._G = env
@@ -838,7 +855,7 @@ function yellowbox:makeenv()
     env.redstone.getAnalogueInput = env.redstone.getAnalogInput
     env.redstone.getAnalogueOutput = env.redstone.getAnalogOutput
     env.redstone.setAnalogueOutput = env.redstone.setAnalogOutput
-    for k,v in pairs(self.apis) do env[k] = v end
+    for k, v in pairs(self.apis) do env[k] = v end
     return env
 end
 
@@ -912,8 +929,8 @@ end
 -- @param ... The event's arguments.
 function yellowbox:queueEvent(event, ...)
     expect(1, event, "string")
-    if (event == "timer" and self.timers[...] == nil) or (event == "alarm" and self.alarms[...] == nil) then return end
-    self.eventQueue[#self.eventQueue+1] = {event, ...}
+    if event == "timer" and self.timers[...] == nil or event == "alarm" and self.alarms[...] == nil then return end
+    self.eventQueue[#self.eventQueue + 1] = {event, ...}
 end
 
 --- Halts the box, deleting any coroutines and resetting the state.
@@ -932,7 +949,7 @@ function yellowbox:mount(innerPath, outerPath)
     expect(1, innerPath, "string")
     expect(2, outerPath, "string")
     local parts = {}
-    for p in fs.combine(innerPath):gmatch("[^/]+") do parts[#parts+1] = p end
+    for p in fs.combine(innerPath):gmatch("[^/]+") do parts[#parts + 1] = p end
     self.mounts[parts] = fs.combine(outerPath)
 end
 
@@ -941,7 +958,7 @@ end
 function yellowbox:unmount(innerPath)
     expect(1, innerPath, "string")
     local parts = {}
-    for p in fs.combine(innerPath):gmatch("[^/]+") do parts[#parts+1] = p end
+    for p in fs.combine(innerPath):gmatch("[^/]+") do parts[#parts + 1] = p end
     for k in pairs(self.mounts) do
         if #k == #p and table.concat(k, "/") == table.concat(p, "/") then
             self.mounts[k] = nil
@@ -961,6 +978,7 @@ function yellowbox:loadBIOS(path)
 end
 
 if found_libdeflate then
+    print("loaded libdeflate")
     --- sets the status of compression for disk files
     -- this uses LibDeflate [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)
     -- this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
@@ -974,6 +992,9 @@ if found_libdeflate then
     function yellowbox:compressionEnabled()
         return self.compression_enabled
     end
+else
+    print("Unnable to load LibDeflate:")
+    print(libdeflate)
 end
 
 --- Loads a VFS disk and optionally sets up write-backs.
@@ -984,17 +1005,29 @@ end
 function yellowbox:loadVFS(path, readOnly)
     expect(1, path, "string")
     expect(2, readOnly, "boolean", "nil")
-    local file, err = fs.open(path, "rb")
+    local file = fs.open(path, "rb")
     if file ~= nil then
         local data = file.readAll()
         file.close()
-        self.disk = textutils.unserialize(data)
+        if self.compression_enabled then
+            print("loading vfs+gzip")
+            self.disk = textutils.unserialize(libdeflate:DecompressGzip(data))
+        else
+            print("loading vfs")
+            self.disk = textutils.unserialize(data)
+        end
     else self.disk = {} end
     if not readOnly then
         self.syncfs = function(self)
             local file = fs.open(path, "wb")
             if file == nil then return end
-            file.write(textutils.serialize(self.disk, {compact = true}))
+            if self.compression_enabled then
+                print("saving vfs+gzip")
+                file.write(libdeflate:CompressGzip(textutils.serialize(self.disk, {compact = true})))
+            else
+                print("saving vfs")
+                file.write(textutils.serialize(self.disk, {compact = true}))
+            end
             file.close()
         end
     else self.syncfs = function() end end
