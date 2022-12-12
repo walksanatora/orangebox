@@ -420,8 +420,8 @@ end
 
 local function crc32_string(s, crc)
   crc = crc or 0
+  sleep()
   for i = 1, #s do
-	sleep()
     crc = crc32_byte(s:byte(i), crc)
   end
   return crc
