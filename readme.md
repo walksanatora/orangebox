@@ -5,7 +5,7 @@ this is basically a maintained fork of [MCJack123/yellowbox.lua](https://gist.gi
 <br>
 since it is EOL for everyone outside of his propietary closed source OS (phoenix, which is ironic because it is called the linux of the CC comunity)<br>
 <br>
-Also adds support for disk compression via [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)<br>
+Also adds support for disk compression via [LibDeflate](https://github.com/MCJack123/CC-Archive/LibDeflate.lua)<br>
 (if it it is `require`able you unlock `yellowbox:setCompression(bool)`)<br>
 
 # imgtool
