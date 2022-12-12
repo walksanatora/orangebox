@@ -7,6 +7,7 @@ since it is EOL for everyone outside of his propietary closed source OS (phoenix
 <br>
 Also adds support for disk compression via [LibDeflate](https://github.com/MCJack123/CC-Archive/LibDeflate.lua)<br>
 (if it it is `require`able you unlock `yellowbox:setCompression(bool)`)<br>
+(added back to this repo because i have had reports of it failing to yield often enough)
 
 # imgtool
 this repo also contains `imgtool` which is a small archive tool that generates gzipped vfs files (which can be used with orangebox if it has LibDeflate)
