@@ -471,6 +471,7 @@ function orangebox:makeenv()
                 self:syncfs()
             end,
             combine = fs.combine,
+            complete = fs.complete,
             open = function(path, mode)
                 expect(1, path, "string")
                 expect(2, mode, "string")
@@ -711,6 +712,8 @@ function orangebox:makeenv()
         http = self.config.http_enable and {
             request = http.request,
             checkURL = http.checkURLAsync,
+            get = http.get,
+            post = http.post,
             websocket = self.config.http_websocket_enable and http.websocketAsync or nil,
         } or nil,
         os = {
@@ -846,7 +849,7 @@ function orangebox:makeenv()
             compressionEnabled = function ()
                return self:compressionEnabled()
             end,
-            exit = function ()
+            stop = function ()
                 self:halt()
             end
         }
