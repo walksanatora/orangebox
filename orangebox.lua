@@ -844,14 +844,6 @@ function orangebox:makeenv()
                 if mask < 0 or mask > 65535 then error("Expected number in range 0-65535", 2) end
                 return bit32.btest(self.redstone.bundledInput[orangebox.sideNames[side]], mask)
             end
-        },
-        vm = {
-            compressionEnabled = function ()
-               return self:compressionEnabled()
-            end,
-            stop = function ()
-                self:halt()
-            end
         }
     }
     env._G = env
