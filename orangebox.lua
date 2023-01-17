@@ -121,6 +121,7 @@ function orangebox:new(bios, disk)
         disk = disk or {},
         syncfs = function() end,
         compression_enabled = false,
+        libdeflate_loaded = false,
         fs_dirty = false,
         sync_last = os.epoch("utc"),
         sync_cooldown_ms = 10000,
@@ -240,6 +241,10 @@ end
 
 local fs, os, peripheral, getfenv, setfenv, load, loadstring = fs, os, peripheral, getfenv, setfenv, load, loadstring
 
+--TODO: implement gcinfo() collectgarbage(), newproxy()
+--http: addListener,checkUrlAsync,head,listen,options,patch,put,removeListener,trace,websocketAsync
+--os: about
+--CCPC: periphemu,mounter,term.screenshot
 --- Creates the environment for the box. This is mostly an internal function,
 -- but it's exported as part of the class.
 -- @treturn table A new environment for the box.
@@ -977,7 +982,6 @@ function orangebox:loadBIOS(path)
 end
 
 if found_libdeflate then
-    print("loaded libdeflate")
     --- sets the status of compression for disk files
     -- this uses LibDeflate [LibDeflate](https://github.com/MCJack123/CC-Archive/#libdeflate)
     -- this option only appears if LibDeflate was able to be required via `require("LibDeflate")`
@@ -992,8 +996,8 @@ if found_libdeflate then
         return self.compression_enabled
     end
 else
-    print("Unnable to load LibDeflate:")
-    print(libdeflate)
+    --print("Unnable to load LibDeflate:")
+    --print(libdeflate)
 end
 
 --- Loads a VFS disk and optionally sets up write-backs.
@@ -1009,31 +1013,25 @@ function orangebox:loadVFS(path, readOnly)
         local data = file.readAll()
         file.close()
         if self.compression_enabled then
-            print("loading vfs+gzip")
             self.disk = textutils.unserialize(libdeflate:DecompressGzip(data))
         else
-            print("loading vfs")
             self.disk = textutils.unserialize(data)
         end
     else self.disk = {} end
     if not readOnly then
         self.syncfs = function(self,force)
-            if force then print("forcing disk sync") end
             if ((self.sync_last + self.sync_cooldown_ms) >= os.epoch("utc")) and self.compression_enabled or force then
                 local file = fs.open(path, "wb")
                 if file == nil then return end
                 if self.compression_enabled then
-                    print("saving vfs+gzip")
                     file.write(libdeflate:CompressGzip(textutils.serialize(self.disk, {compact = true})))
                 else
-                    print("saving vfs")
                     file.write(textutils.serialize(self.disk, {compact = true}))
                 end
                 file.close()
                 self.fs_dirty = false
                 self.sync_last = os.epoch("utc")
             else
-                print("defer sync")
                 self.fs_dirty = true
             end
         end
